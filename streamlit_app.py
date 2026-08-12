@@ -275,16 +275,32 @@ def train_q_agent(obstacles):
 # ==========================================
 # 3. GAME STATE
 # ==========================================
+# Roll fresh maze+agent pairs hunting for a beatable AI. Only ~5% of honestly
+# trained agents end up suboptimal, but training takes ~8 ms per maze, so a
+# large cap still resolves in about a second and all but guarantees a hit.
+MAX_GAME_ATTEMPTS = 200
+
+
 def new_game():
-    with st.spinner("🤖 Training Q-learning agent on a fresh maze..."):
-        obstacles, par = generate_solvable_maze()
-        q_table, ai_path, episodes_trained = train_q_agent(obstacles)
+    """
+    Train an agent on a fresh maze, up to MAX_GAME_ATTEMPTS times, and keep
+    the first game where the AI's path is beatable (longer than optimal).
+    Each agent is trained honestly — we only curate which game is presented.
+    If no attempt produces a beatable AI, the last one is kept.
+    """
+    with st.spinner("🤖 Training Q-learning agents — hunting for a beatable one..."):
+        for attempt in range(1, MAX_GAME_ATTEMPTS + 1):
+            obstacles, par = generate_solvable_maze()
+            q_table, ai_path, episodes_trained = train_q_agent(obstacles)
+            if ai_path is not None and len(ai_path) - 1 > par:
+                break
     st.session_state.obstacles = obstacles
     st.session_state.par = par
     st.session_state.q_table = q_table
     st.session_state.ai_path = ai_path
     st.session_state.ai_steps = len(ai_path) - 1 if ai_path else -1
     st.session_state.episodes_trained = episodes_trained
+    st.session_state.agents_trained = attempt
     restart_run()
 
 
@@ -353,6 +369,7 @@ with st.expander("🧠 Show Q-table and hyperparameters"):
         | Exploration (ε) | 1.0 → {EPS_MIN} (×{EPS_DECAY} per episode) |
         | Training budget | stops at the **first** policy that solves the maze (max {MAX_EPISODES} episodes) |
         | Episodes trained (this maze) | {st.session_state.episodes_trained} |
+        | Game curation | up to {MAX_GAME_ATTEMPTS} maze+agent pairs rolled, first beatable AI kept (this game: {st.session_state.get("agents_trained", 1)} rolled, AI is {"beatable" if st.session_state.ai_steps > st.session_state.par else "optimal"}) |
         | Max steps per episode | {MAX_STEPS} |
         | Reward | +100 goal · −1 per step |
         """
