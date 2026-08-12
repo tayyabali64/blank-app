@@ -86,20 +86,29 @@ st.markdown(
     /* Hide the keyboard-shortcut hint (the little arrow) inside buttons */
     div.stButton button kbd {display: none;}
 
-    /* Subtle, quiet move buttons */
+    /* Subtle, quiet move buttons — arrows in the same blue as the open cells */
     .st-key-up button, .st-key-down button, .st-key-left button, .st-key-right button {
         background: rgba(128, 128, 128, 0.2) !important;
-        color: #8A97A5 !important;
+        color: #2E4053 !important;
         border: 1px solid rgba(128, 128, 128, 0.22) !important;
         box-shadow: none;
         font-size: 1.15rem;
         font-weight: 400;
         line-height: 1;
     }
+    /* The label lives in a markdown <p> that overrides inherited styles */
+    .st-key-up button p, .st-key-down button p, .st-key-left button p, .st-key-right button p {
+        color: #2E4053 !important;
+        font-size: 1.15rem !important;
+    }
+    .st-key-up button p, .st-key-down button p {
+        font-weight: 900 !important;
+        -webkit-text-stroke: 1px #2E4053;
+    }
     .st-key-up button:hover, .st-key-down button:hover,
     .st-key-left button:hover, .st-key-right button:hover {
         background: rgba(128, 128, 128, 0.14) !important;
-        color: #5D6B77 !important;
+        color: #1F2E3D !important;
     }
     .st-key-up button:active, .st-key-down button:active,
     .st-key-left button:active, .st-key-right button:active {
